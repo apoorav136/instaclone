@@ -1,4 +1,3 @@
-
 from django.shortcuts import render, redirect
 from forms import SignUpForm, LoginForm, PostForm, LikeForm, CommentForm
 from models import UserModel, SessionToken, PostModel, LikeModel, CommentModel
@@ -6,9 +5,14 @@ from django.contrib.auth.hashers import make_password, check_password
 from datetime import timedelta
 from django.utils import timezone
 from instagramclone.settings import BASE_DIR
+import sendgrid
+from api import SENDGRID_API_KEY
+from sendgrid.helpers.mail import *
 from imgurpython import ImgurClient
-YOUR_CLIENT_ID= '0002161fe35de3d'
-YOUR_CLIENT_SECRET="f45b827e48c1444021046778a2c3e3e573432709"
+
+YOUR_CLIENT_ID = '0002161fe35de3d'
+YOUR_CLIENT_SECRET = "f45b827e48c1444021046778a2c3e3e573432709"
+
 
 def signup_view(request):
     if request.method == "POST":
@@ -21,6 +25,16 @@ def signup_view(request):
             # saving data to DB
             user = UserModel(name=name, password=make_password(password), email=email, username=username)
             user.save()
+            sg = sendgrid.SendGridAPIClient(apikey=(SENDGRID_API_KEY))
+            from_email = Email("apooravsharma1997@gamil.com")
+            to_email = Email(form.cleaned_data['email'])
+            subject = "Welcome to Review book??"
+            content = Content("text/plain", "Thank you for signing up  with REVIEW BOOK. /n We provide best reviews on various products which makes easy choices for you./n Team , REVIEW BOOK.""  ??????")
+            mail = Mail(from_email, subject, to_email, content)
+            response = sg.client.mail.send.post(request_body=mail.get())
+            print(response.status_code)
+            print(response.body)
+            print(response.headers)
             return render(request, 'login.html')
 
     else:
@@ -57,7 +71,7 @@ def login_view(request):
 
 
 def post_view(request):
-    user= check_validation(request)
+    user = check_validation(request)
 
     if user:
         if request.method == 'POST':
@@ -70,25 +84,23 @@ def post_view(request):
 
                 path = str(BASE_DIR + post.image.url)
                 client = ImgurClient(YOUR_CLIENT_ID, YOUR_CLIENT_SECRET)
-                post.image_url = client.upload_from_path(path,anon=True)['link']
+                post.image_url = client.upload_from_path(path, anon=True)['link']
                 post.save()
-
-                return redirect('feed/')
+                return redirect('/feed/')
 
         else:
             form = PostForm()
-        return render(request, 'post.html', {'form' : form})
+        return render(request, 'post.html', {'form': form})
     else:
         return redirect('/login/')
 
 
-
-#For validating the session
+# For validating the session
 def check_validation(request):
     if request.COOKIES.get('session_token'):
         session = SessionToken.objects.filter(session_token=request.COOKIES.get('session_token')).first()
         if session:
-           return session.user
+            return session.user
     else:
         return None
 
@@ -117,6 +129,7 @@ def like_view(request):
         if form.is_valid():
             post_id = form.cleaned_data.get('post').id
             existing_like = LikeModel.objects.filter(post_id=post_id, user=user).first()
+
             if not existing_like:
                 LikeModel.objects.create(post_id=post_id, user=user)
             else:

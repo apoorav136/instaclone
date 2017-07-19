@@ -21,14 +21,14 @@ class PostModel(models.Model):
     updated_on = models.DateTimeField(auto_now=True)
     has_liked = False
 
-
     @property
     def like_count(self):
-		return len(LikeModel.objects.filter(post=self))
+        return len(LikeModel.objects.filter(post=self))
 
     @property
     def comments(self):
-		return CommentModel.objects.filter(post=self).order_by('-created_on')
+        return CommentModel.objects.filter(post=self).order_by('-created_on')
+
 
 class LikeModel(models.Model):
     user = models.ForeignKey(UserModel)
@@ -44,6 +44,7 @@ class CommentModel(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
 
+
 class SessionToken(models.Model):
     user = models.ForeignKey(UserModel)
     session_token = models.CharField(max_length=255)
@@ -53,8 +54,3 @@ class SessionToken(models.Model):
 
     def create_token(self):
         self.session_token = uuid.uuid4()
-
-
-
-
-
