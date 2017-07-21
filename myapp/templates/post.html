@@ -49,9 +49,8 @@ h1 {
 <div class = "appu"><br>
 <form method="POST"action="" enctype="multipart/form-data">
     {% csrf_token %}
+    {{form.as_p}}
 
-   <br> <input type="file" name="image" value={{image}} accept="image"><br>
-<br><input id="caption" type="text" name="caption" placeholder="caption" value={{image}} ><br>
     <br><input type="submit"value="post"><br>
 
 </form>
