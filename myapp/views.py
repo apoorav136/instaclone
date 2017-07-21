@@ -1,20 +1,30 @@
 from django.shortcuts import render, redirect
+# from django we import forms that we want to view
 from forms import SignUpForm, LoginForm, PostForm, LikeForm, CommentForm
+# models are imported.
+# in this file we are adding functionality to our project
 from models import UserModel, SessionToken, PostModel, LikeModel, CommentModel
+# hashers library converts passwords to hashcode so that they are safe and increases privacy
 from django.contrib.auth.hashers import make_password, check_password
+
+# datetime module is used to display / use local time on webpage
 from datetime import timedelta
 from django.utils import timezone
 from instagramclone.settings import BASE_DIR
+# sendgrid api is used to send automated emails to users
 import sendgrid
+# for this we import api key from api.py
+# due to privacy concern i havent uploaded my apikey
 from api import SENDGRID_API_KEY
 from sendgrid.helpers.mail import *
+# imgr api is used to save images on server / cloud which provides us the url required
 from imgurpython import ImgurClient
-from django.core.mail import send_mail
-from paralleldots import set_api_key, sentiment
-from api import  YOUR_API_KEY
-import ctypes
 YOUR_CLIENT_ID = '0002161fe35de3d'
+# this is my client id and secret
 YOUR_CLIENT_SECRET = "f45b827e48c1444021046778a2c3e3e573432709"
+
+import ctypes
+
 
 
 def signup_view(request):
@@ -159,6 +169,7 @@ def comment_view(request):
         if form.is_valid():
             post_id = form.cleaned_data.get('post').id
             comment_text = form.cleaned_data.get('comment_text')
+
             comment = CommentModel.objects.create(user=user, post_id=post_id, comment_text=comment_text)
             comment.save()
 
