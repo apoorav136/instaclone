@@ -54,25 +54,7 @@ input[type="submit"] {
 
 <form method="post">
 {% csrf_token %}
-            <div><br>
-
-                <input id="username" type="text"name="username"placeholder="Username" value={{ username }} >
-            </div><br>
-
-            <div><br>
-
-                <input id="name" type="text"name="name"placeholder="Full name" value={{ name }} >
-            </div><br>
-
-            <div><br>
-
-                <input id="email" type="text"name="email" placeholder="Email" value={{ email }} >
-            </div><br>
-
-            <div><br>
-
-                <input id="password" type="password" name="password" placeholder="Password" value={{ password }}>
-            </div><br>
+{{form.as_p}}
                 <input type="submit" value="Sign Up">
         </form>
 
