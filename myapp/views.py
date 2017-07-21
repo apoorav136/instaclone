@@ -26,26 +26,27 @@ def signup_view(request):
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
 
-
-            if len(username)>4 and len(password)>5 :
-                user = UserModel(name=name, password=make_password(password), email=email, username=username)
-                user.save()
-                sg = sendgrid.SendGridAPIClient(apikey=(SENDGRID_API_KEY))
-                from_email = Email("apooravsharma1997@gamil.com")
-                to_email = Email(form.cleaned_data['email'])
-                subject = "Welcome to Review book??"
-                content = Content("text/plain", "Thank you for signing up  with REVIEW BOOK. /n We provide best reviews on various products which makes easy choices for you./n Team , REVIEW BOOK.""  ??????")
-                mail = Mail(from_email, subject, to_email, content)
-                response = sg.client.mail.send.post(request_body=mail.get())
-                print(response.status_code)
-                print(response.body)
-                print(response.headers)
-                ctypes.windll.user32.MessageBoxW(0, u"successfully signed up", u"success", 0)
-                return render(request, 'login.html')
-
+            if set('abcdefghijklmnopqrstuvwxyz').intersection(name) and set('abcdefghijklmnopqrstuvwxyz@_1234567890').intersection(username):
+                if len(username)>4 and len(password)>5 :
+                    user = UserModel(name=name, password=make_password(password), email=email, username=username)
+                    user.save()
+                    sg = sendgrid.SendGridAPIClient(apikey=(SENDGRID_API_KEY))
+                    from_email = Email("apooravsharma1997@gamil.com")
+                    to_email = Email(form.cleaned_data['email'])
+                    subject = "Welcome to Review book??"
+                    content = Content("text/plain", "Thank you for signing up  with REVIEW BOOK. /n We provide best reviews on various products which makes easy choices for you./n Team , REVIEW BOOK.""  ??????")
+                    mail = Mail(from_email, subject, to_email, content)
+                    response = sg.client.mail.send.post(request_body=mail.get())
+                    print(response.status_code)
+                    print(response.body)
+                    print(response.headers)
+                    ctypes.windll.user32.MessageBoxW(0, u"successfully signed up", u"success", 0)
+                    return render(request, 'login.html')
+                else:
+                    ctypes.windll.user32.MessageBoxW(0, u"invalid enteries. please try again", u"Error", 0)
+                    form= SignUpForm()
             else:
-                ctypes.windll.user32.MessageBoxW(0, u"invalid enteries. please try again", u"Error", 0)
-                form= SignUpForm()
+                ctypes.windll.user32.MessageBoxW(0, u"invalid name/username", u"error", 0)
 
     else:
         form = SignUpForm()
