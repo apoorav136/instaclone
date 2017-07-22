@@ -13,6 +13,8 @@
     </form>
 
 
+  </form><br>
+    <a href="{%url 'logout'%}">Log out</a>
     {% for post in posts %}
 
 
@@ -48,7 +50,7 @@
 
         <div>
             {% for comment in post.comments %}
-                <p><b>{{ comment.user.username }} [{{ comment.created_on }}]:</b> {{ comment.comment_text }}</p>
+                <p><b>{{ comment.user.username }} [{{ comment.created_on }}]:</b> {{ comment.comment_text }} {{comment.dots}}</p>
             {% endfor %}
         </div>
 
