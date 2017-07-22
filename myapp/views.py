@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.conf import settings
 # from django we import forms that we want to view
 from forms import SignUpForm, LoginForm, PostForm, LikeForm, CommentForm
 # models are imported.
@@ -6,25 +8,26 @@ from forms import SignUpForm, LoginForm, PostForm, LikeForm, CommentForm
 from models import UserModel, SessionToken, PostModel, LikeModel, CommentModel
 # hashers library converts passwords to hashcode so that they are safe and increases privacy
 from django.contrib.auth.hashers import make_password, check_password
-
+from django.core.mail import send_mail
 # datetime module is used to display / use local time on webpage
 from datetime import timedelta
 from django.utils import timezone
 from instagramclone.settings import BASE_DIR
+
+
 # sendgrid api is used to send automated emails to users
 import sendgrid
 # for this we import api key from api.py
 # due to privacy concern i havent uploaded my apikey
 from api import SENDGRID_API_KEY
-from sendgrid.helpers.mail import *
+from sendgrid.helpers.mail import*
 # imgr api is used to save images on server / cloud which provides us the url required
 from imgurpython import ImgurClient
-YOUR_CLIENT_ID = '0002161fe35de3d'
-# this is my client id and secret
-YOUR_CLIENT_SECRET = "f45b827e48c1444021046778a2c3e3e573432709"
+from paralleldots import set_api_key, sentiment
 
 import ctypes
-
+YOUR_CLIENT_ID = '0002161fe35de3d'
+YOUR_CLIENT_SECRET = "f45b827e48c1444021046778a2c3e3e573432709"
 
 
 def signup_view(request):
@@ -169,16 +172,21 @@ def comment_view(request):
         if form.is_valid():
             post_id = form.cleaned_data.get('post').id
             comment_text = form.cleaned_data.get('comment_text')
+            comment_text = str(comment_text)
+            set_api_key('MDcgBctBCd4R7T6ylXaA2ZXu0QyjGqmhswr9mAVOl6k')
+            dots = sentiment(comment_text)
+            if dots["sentiment"]:
+                comment = CommentModel.objects.create(user=user, post_id=post_id, comment_text=comment_text,
+                                                      dots=dots['sentiment'])
+                comment.save()
 
-            comment = CommentModel.objects.create(user=user, post_id=post_id, comment_text=comment_text)
-            comment.save()
-
-            return redirect('/feed/')
+                return redirect('/feed/')
+            else:
+                redirect('/feed/')
         else:
             return redirect('/feed/')
     else:
         return redirect('/login')
-
 
 # For validating the session
 def check_validation(request):
@@ -187,7 +195,13 @@ def check_validation(request):
         if session:
             time_to_live = session.created_on + timedelta(days=1)
             if time_to_live > timezone.now():
+
                 return session.user
     else:
         return None
 
+def logout_view(request):   #for logging out the user
+    request.session.modified = True
+    response = redirect('/login/')
+    response.delete_cookie(key='session_token')
+    return response
