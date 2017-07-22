@@ -158,7 +158,18 @@ def like_view(request):
             post_id = form.cleaned_data.get('post').id
             existing_like = LikeModel.objects.filter(post_id=post_id, user=user).first()
             if not existing_like:
-                LikeModel.objects.create(post_id=post_id, user=user)
+                like = LikeModel.objects.create(post_id=post_id, user=user)
+                sg = sendgrid.SendGridAPIClient(apikey=(SENDGRID_API_KEY))
+                from_email = Email("apooravsharma1997@gmail.com")
+                to_email = Email(like.post.user.email)
+                subject = "Welcome to Review book"
+                content = Content("text/plain", "someone just liked your post. Go checkout!")
+                mail = Mail(from_email, subject, to_email, content)
+                response = sg.client.mail.send.post(request_body=mail.get())
+                print(response.status_code)
+                print(response.body)
+                print(response.headers)
+
             else:
                 existing_like.delete()
             return redirect('/feed/')
