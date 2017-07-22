@@ -1,6 +1,4 @@
 from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.conf import settings
 # from django we import forms that we want to view
 from forms import SignUpForm, LoginForm, PostForm, LikeForm, CommentForm
 # models are imported.
@@ -8,7 +6,7 @@ from forms import SignUpForm, LoginForm, PostForm, LikeForm, CommentForm
 from models import UserModel, SessionToken, PostModel, LikeModel, CommentModel
 # hashers library converts passwords to hashcode so that they are safe and increases privacy
 from django.contrib.auth.hashers import make_password, check_password
-from django.core.mail import send_mail
+
 # datetime module is used to display / use local time on webpage
 from datetime import timedelta
 from django.utils import timezone
@@ -46,8 +44,10 @@ def signup_view(request):
                     sg = sendgrid.SendGridAPIClient(apikey=(SENDGRID_API_KEY))
                     from_email = Email("apooravsharma1997@gamil.com")
                     to_email = Email(form.cleaned_data['email'])
-                    subject = "Welcome to Review book??"
-                    content = Content("text/plain", "Thank you for signing up  with REVIEW BOOK. /n We provide best reviews on various products which makes easy choices for you./n Team , REVIEW BOOK.""  ??????")
+                    subject = "Welcome to Review book"
+                    content = Content("text/plain", "Thank you for signing up  with REVIEW BOOK."
+                                                    " We provide best reviews on various products which makes easy choices for you."
+                                                    " Team , REVIEW BOOK.""  ")
                     mail = Mail(from_email, subject, to_email, content)
                     response = sg.client.mail.send.post(request_body=mail.get())
                     print(response.status_code)
@@ -153,10 +153,10 @@ def like_view(request):
     user = check_validation(request)
     if user and request.method == 'POST':
         form = LikeForm(request.POST)
+
         if form.is_valid():
             post_id = form.cleaned_data.get('post').id
             existing_like = LikeModel.objects.filter(post_id=post_id, user=user).first()
-
             if not existing_like:
                 LikeModel.objects.create(post_id=post_id, user=user)
             else:
@@ -164,6 +164,11 @@ def like_view(request):
             return redirect('/feed/')
     else:
         return redirect('/login/')
+
+
+
+
+
 
 def comment_view(request):
     user = check_validation(request)
@@ -179,7 +184,16 @@ def comment_view(request):
                 comment = CommentModel.objects.create(user=user, post_id=post_id, comment_text=comment_text,
                                                       dots=dots['sentiment'])
                 comment.save()
-
+                sg = sendgrid.SendGridAPIClient(apikey=(SENDGRID_API_KEY))
+                from_email = Email("apooravsharma1997@gmail.com")
+                to_email = Email(comment.post.user.email)
+                subject = "Welcome to Review book"
+                content = Content("text/plain", "someone just commented on your post. Go check" )
+                mail = Mail(from_email, subject, to_email, content)
+                response = sg.client.mail.send.post(request_body=mail.get())
+                print(response.status_code)
+                print(response.body)
+                print(response.headers)
                 return redirect('/feed/')
             else:
                 redirect('/feed/')
