@@ -44,11 +44,11 @@ class LikeModel(models.Model):
 
 # database for comment model is created consisting of various fields used to store value to user who commented on the post
 class CommentModel(models.Model):
-
+    user= models.ForeignKey(UserModel)
     # this odel has used post as foreign keyuser = models.ForeignKey(UserModel)
     post = models.ForeignKey(PostModel)
     comment_text = models.CharField(max_length=555)
-
+    dots = models.CharField(max_length=555)
     # auto_add_now gives time at which comment is created
     #auto_now gives time on which comment has been updated
     created_on = models.DateTimeField(auto_now_add=True)
