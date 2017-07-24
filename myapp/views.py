@@ -231,5 +231,9 @@ def logout_view(request):   #for logging out the user
 
 
 def posts_of_particular_user(request,user_name):
-    posts=PostModel.objects.all().filter(user__username=user_name)
-    return render(request,'postsofuser.html',{'posts':posts,'user_name':user_name})
+    user=check_validation(request)
+    if user:
+        posts=PostModel.objects.all().filter(user__username=user_name)
+        return render(request,'postsofuser.html',{'posts':posts,'user_name':user_name})
+    else:
+        return redirect('/login/')
