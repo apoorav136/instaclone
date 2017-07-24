@@ -139,8 +139,6 @@ def feed_view(request):
         posts = PostModel.objects.all().order_by('created_on')
         for post in posts:
             existing_like = LikeModel.objects.filter(post_id=post.id, user=user).first()
-
-
             if existing_like:
                 post.has_liked = True
         return render(request, 'feed.html', {'posts': posts})
@@ -230,3 +228,8 @@ def logout_view(request):   #for logging out the user
     response = redirect('/login/')
     response.delete_cookie(key='session_token')
     return response
+
+
+def posts_of_particular_user(request,user_name):
+    posts=PostModel.objects.all().filter(user__username=user_name)
+    return render(request,'postsofuser.html',{'posts':posts,'user_name':user_name})
